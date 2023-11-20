@@ -16,6 +16,7 @@ counting = False
 paused = False
 tempMinutes = 0
 tempSeconds = 0
+tempSwitchOn = False
 
 ## -- system settings -- ##
 # Sets the appearance of the program to the system default (light or dark)
@@ -45,10 +46,9 @@ def themeToggle():
 
     if switchValue == True:
         switch.configure(image=lightSwitch)
-        style.theme_use("simplex")
+        style.theme_use("litera")
         ctkt.set_appearance_mode("light")
         lightDarkDifference = "white"
-        exitButton.configure(text_color="black")
         switchValue = False
     
     else:
@@ -56,7 +56,6 @@ def themeToggle():
         style.theme_use("darkly")
         ctkt.set_appearance_mode("dark")
         lightDarkDifference = "transparent"
-        exitButton.configure(text_color="white")
         switchValue = True
 
     timerFrame.configure(bg_color=lightDarkDifference)
@@ -66,7 +65,6 @@ def themeToggle():
     huntCounterUpButton.configure(bg_color=lightDarkDifference)
     huntCounterDownButton.configure(bg_color=lightDarkDifference)
     huntCounterClearButton.configure(bg_color=lightDarkDifference)
-    exitButton.configure(bg_color=lightDarkDifference,fg_color=lightDarkDifference)
     titleFrame.configure(bg_color=lightDarkDifference)
     title.configure(bg_color=lightDarkDifference)
     switch.configure(bg_color=lightDarkDifference)
@@ -75,11 +73,43 @@ def exitAllProgram():
     root.destroy()
     exit()
 
+def fileDropdownOptions(x):
+    global tempSwitchOn
+    if x == "Always on Top" and tempSwitchOn == False:
+        tempSwitchOn = True
+        root.wm_attributes("-topmost", 1)
+    elif x == "Always on Top" and tempSwitchOn == True:
+        tempSwitchOn = False
+        root.wm_attributes("-topmost", 0)
+    else:
+        exitAllProgram()
+
+# fileFrame = ctkt.CTkFrame(root,bg_color="transparent",fg_color="transparent")
+# fileFrame.pack(side="top",anchor="w")
+
+
+
+# fileDropdown = ctkt.CTkComboBox(fileFrame, values=["Always On Top", "Exit"], command=fileDropdownOptions)
+# fileDropdown.pack(side="left")
+
 titleFrame = ctkt.CTkFrame(root,bg_color="transparent",fg_color="transparent")
 titleFrame.pack(side="top")
 
-exitButton = ctkt.CTkButton(titleFrame,text="Exit",command=exitAllProgram,width=50,bg_color=lightDarkDifference,fg_color=lightDarkDifference,corner_radius=0,border_width=0,border_spacing=0)
-exitButton.pack(padx=0,pady=0, side="left")
+# exitButton = ctkt.CTkButton(titleFrame,text="Exit",command=exitAllProgram, width=50,bg_color=lightDarkDifference,fg_color=lightDarkDifference,corner_radius=0,border_width=0,border_spacing=0)
+# exitButton.pack(padx=0,pady=0, side="left")
+
+fileDropdownMenu = ttk.Menubutton(titleFrame,text="File")
+fileDropdownMenu.pack(side="left",anchor="w")
+
+# Creates menu
+fileDropdownInsideMenu = ttk.Menu(fileDropdownMenu)
+
+# Adds items to menu
+fileMenuItem = StringVar()
+for x in ["Always on Top", "Exit"]:
+    fileDropdownInsideMenu.add_radiobutton(label=x,command=lambda x=x: fileDropdownOptions(x))
+
+fileDropdownMenu["menu"] = fileDropdownInsideMenu
 
 title = ctkt.CTkLabel(titleFrame, text="AIO Masuda Method Tool")
 # Inserts element + padding ("pady" is distance from top of program )
@@ -277,6 +307,8 @@ huntCounterClearButton.pack()
 # timerLabel = ctkt.CTkLabel(picnicFrame, text=)
 # # Inserts element + padding ("pady" is distance from top of program )
 # timerLabel.pack(padx=1, pady=1)
+
+root.protocol('WM_DELETE_WINDOW', exitAllProgram)
 
 try:
     hCount = ast.literal_eval(loadHuntCount(huntCountSaveFile))

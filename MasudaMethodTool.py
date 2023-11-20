@@ -127,8 +127,7 @@ def timerCountdown():
     if paused == False:
         minute, second = 5, 0
         minuteT.set(f" 0{minute} ")
-        minuteLabel.update()
-        secondLabel.update()
+        timerFrame.update()
     else:
         minute, second = tempMinutes, tempSeconds
         paused = False
@@ -141,17 +140,15 @@ def timerCountdown():
 
             if second > 9:
                 secondT.set(f" {second} ")
+                timerFrame.update()
                 second -= 1
                 totalinseconds -= 1
-                minuteLabel.update()
-                secondLabel.update()
                 time.sleep(1)
             else:
                 secondT.set(f" 0{second} ")
+                timerFrame.update()
                 second -= 1
                 totalinseconds -= 1
-                minuteLabel.update()
-                secondLabel.update()
                 time.sleep(1)
             
         elif minute > 0:
@@ -179,13 +176,11 @@ def timerPause():
         paused = True
         if second > 9:
             secondT.set(f" {second} ")
-            minuteLabel.update()
-            secondLabel.update()
+            timerFrame.update()
             tempSeconds = second
         else:
             secondT.set(f" 0{second} ")
-            minuteLabel.update()
-            secondLabel.update()
+            timerFrame.update()
             tempSeconds = second
         if minute > 9:
             minuteT.set(f" {minute} ")

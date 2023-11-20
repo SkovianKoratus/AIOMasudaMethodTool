@@ -1,6 +1,7 @@
 import tkinter as tkt
 #from tkinter import ttk
 from tkinter import *
+from tkinter import messagebox
 import customtkinter as ctkt
 import time
 from pygame import mixer
@@ -9,6 +10,12 @@ from pynput.keyboard import Key, Listener
 import ttkbootstrap as ttk
 
 mixer.init()
+
+def exitAllProgram():
+    root.quit()
+    root.destroy()
+    listener.stop()
+
 
 huntCountSaveFile = "Data/huntCount.txt"
 
@@ -23,6 +30,8 @@ tempSwitchOn = False
 ctkt.set_appearance_mode("dark")
 # Sets the default color theme of the program
 #ctkt.set_default_color_theme("dark-blue")
+
+
 
 ## -- App Frame -- ##
 # initialize tkinter
@@ -69,10 +78,7 @@ def themeToggle():
     title.configure(bg_color=lightDarkDifference)
     switch.configure(bg_color=lightDarkDifference)
 
-def exitAllProgram():
-    root.quit()
-    root.destroy()
-    exit()
+
 
 def fileDropdownOptions(x):
     global tempSwitchOn
@@ -309,9 +315,10 @@ huntCounterClearButton.pack()
 # # Inserts element + padding ("pady" is distance from top of program )
 # timerLabel.pack(padx=1, pady=1)
 
+
+
 if __name__ == "__main__":
-    main = root
-    main.protocol("WM_DELETE_WINDOW", exitAllProgram)
+    
 
     try:
         hCount = ast.literal_eval(loadHuntCount(huntCountSaveFile))
@@ -319,10 +326,13 @@ if __name__ == "__main__":
     except:
         hCount = {}
 
-
     with Listener(on_release=onRelease) as listener:
         ## -- Run App -- ##
-        main.mainloop()
-
+        root.protocol("WM_DELETE_WINDOW", exitAllProgram)
+        root.mainloop()
         listener.join()
+
+        
+    
+        
 

@@ -70,6 +70,7 @@ def themeToggle():
     switch.configure(bg_color=lightDarkDifference)
 
 def exitAllProgram():
+    root.quit()
     root.destroy()
     exit()
 
@@ -308,17 +309,20 @@ huntCounterClearButton.pack()
 # # Inserts element + padding ("pady" is distance from top of program )
 # timerLabel.pack(padx=1, pady=1)
 
-root.protocol('WM_DELETE_WINDOW', exitAllProgram)
+if __name__ == "__main__":
+    main = root
+    main.protocol("WM_DELETE_WINDOW", exitAllProgram)
 
-try:
-    hCount = ast.literal_eval(loadHuntCount(huntCountSaveFile))
-    huntCounter.set(int(hCount))
-except:
-    hCount = {}
+    try:
+        hCount = ast.literal_eval(loadHuntCount(huntCountSaveFile))
+        huntCounter.set(int(hCount))
+    except:
+        hCount = {}
 
 
-with Listener(on_release=onRelease) as listener:
-    ## -- Run App -- ##
-    root.mainloop()
+    with Listener(on_release=onRelease) as listener:
+        ## -- Run App -- ##
+        main.mainloop()
 
-    listener.join()
+        listener.join()
+

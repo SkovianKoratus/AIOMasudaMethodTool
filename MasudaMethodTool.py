@@ -71,12 +71,14 @@ def themeToggle():
     title.configure(bg_color=lightDarkDifference)
     switch.configure(bg_color=lightDarkDifference)
 
-        
+def exitAllProgram():
+    root.destroy()
+    exit()
 
 titleFrame = ctkt.CTkFrame(root,bg_color="transparent",fg_color="transparent")
 titleFrame.pack(side="top")
 
-exitButton = ctkt.CTkButton(titleFrame,text="Exit",command=root.destroy,width=50,bg_color=lightDarkDifference,fg_color=lightDarkDifference,corner_radius=0,border_width=0,border_spacing=0)
+exitButton = ctkt.CTkButton(titleFrame,text="Exit",command=exitAllProgram,width=50,bg_color=lightDarkDifference,fg_color=lightDarkDifference,corner_radius=0,border_width=0,border_spacing=0)
 exitButton.pack(padx=0,pady=0, side="left")
 
 title = ctkt.CTkLabel(titleFrame, text="AIO Masuda Method Tool")

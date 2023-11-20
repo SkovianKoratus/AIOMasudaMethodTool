@@ -12,9 +12,14 @@ import ttkbootstrap as ttk
 mixer.init()
 
 def exitAllProgram():
+    global listener
     root.quit()
     root.destroy()
-    listener.stop()
+    if listener:
+        listener.stop()  # stop thread
+        listener.join()  # wait till thread really ends its job
+        listener = None  # to inform that listener doesn't exist
+
 
 
 huntCountSaveFile = "Data/huntCount.txt"
@@ -24,6 +29,36 @@ paused = False
 tempMinutes = 0
 tempSeconds = 0
 tempSwitchOn = False
+listeningSwitch = False
+
+def onRelease(key):
+    if key == Key.up:
+        huntCountUp()
+
+    elif key==Key.down:
+        huntCountDown()
+    
+    elif key==Key.alt_l:
+        timerPause()
+    
+    elif key==Key.ctrl_l:
+        timerCountdown()
+
+def listenerStart():
+    global listener
+
+    if not listener:
+        listener = Listener(on_release=onRelease)
+        listener.start() # start thread
+
+def listenerStop():
+    global listener
+
+    if listener:
+        listener.stop()  # stop thread
+        listener.join()  # wait till thread really ends its job
+        listener = None  # to inform that listener doesn't exist
+
 
 ## -- system settings -- ##
 # Sets the appearance of the program to the system default (light or dark)
@@ -82,12 +117,19 @@ def themeToggle():
 
 def fileDropdownOptions(x):
     global tempSwitchOn
+    global listeningSwitch
     if x == "Always on Top" and tempSwitchOn == False:
         tempSwitchOn = True
         root.wm_attributes("-topmost", 1)
     elif x == "Always on Top" and tempSwitchOn == True:
         tempSwitchOn = False
         root.wm_attributes("-topmost", 0)
+    elif x == "Toggle Listening" and listeningSwitch == True:
+        listeningSwitch = False
+        listenerStop()
+    elif x == "Toggle Listening" and listeningSwitch == False:
+        listeningSwitch = True
+        listenerStart()
     else:
         exitAllProgram()
 
@@ -105,7 +147,7 @@ titleFrame.pack(side="top")
 # exitButton = ctkt.CTkButton(titleFrame,text="Exit",command=exitAllProgram, width=50,bg_color=lightDarkDifference,fg_color=lightDarkDifference,corner_radius=0,border_width=0,border_spacing=0)
 # exitButton.pack(padx=0,pady=0, side="left")
 
-fileDropdownMenu = ttk.Menubutton(titleFrame,text="File")
+fileDropdownMenu = ttk.Menubutton(titleFrame,text="Settings")
 fileDropdownMenu.pack(side="left",anchor="w")
 
 # Creates menu
@@ -113,7 +155,7 @@ fileDropdownInsideMenu = ttk.Menu(fileDropdownMenu)
 
 # Adds items to menu
 fileMenuItem = StringVar()
-for x in ["Always on Top", "Exit"]:
+for x in ["Always on Top", "Toggle Listening", "Exit"]:
     fileDropdownInsideMenu.add_radiobutton(label=x,command=lambda x=x: fileDropdownOptions(x))
 
 fileDropdownMenu["menu"] = fileDropdownInsideMenu
@@ -280,18 +322,7 @@ def huntCountClear():
     saveHuntCount(0,huntCountSaveFile)
     huntCounterLabel.update()
     
-def onRelease(key):
-    if key == Key.up:
-        huntCountUp()
 
-    elif key==Key.down:
-        huntCountDown()
-    
-    elif key==Key.alt_l:
-        timerPause()
-    
-    elif key==Key.ctrl_l:
-        timerCountdown()
 
 huntCounterFrame = ctkt.CTkFrame(huntCanvas, fg_color="transparent")
 huntCounterFrame.pack()
@@ -319,20 +350,20 @@ huntCounterClearButton.pack()
 
 if __name__ == "__main__":
     
-
     try:
         hCount = ast.literal_eval(loadHuntCount(huntCountSaveFile))
         huntCounter.set(int(hCount))
     except:
         hCount = {}
 
-    with Listener(on_release=onRelease) as listener:
-        ## -- Run App -- ##
-        root.protocol("WM_DELETE_WINDOW", exitAllProgram)
-        root.mainloop()
-        listener.join()
+    listener = None  # to keep listener
 
-        
-    
-        
+    root.protocol("WM_DELETE_WINDOW", exitAllProgram)
+    root.mainloop()
+
+    if listener: # if listener is not None:
+        listener.stop()  # stop thread
+        listener.join()  # wait till thread really ends its job
+
+
 

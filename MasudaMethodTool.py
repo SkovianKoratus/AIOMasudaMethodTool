@@ -9,10 +9,17 @@ import ast
 from pynput.keyboard import Key, Listener
 import ttkbootstrap as ttk
 
+# initialize mixer from pygame
 mixer.init()
 
+# Exit program function
 def exitAllProgram():
     global listener
+    global counting
+    global paused
+    if counting == True and paused == False:
+        counting = False
+        paused = True
     root.quit()
     root.destroy()
     if listener:
@@ -21,16 +28,19 @@ def exitAllProgram():
         listener = None  # to inform that listener doesn't exist
 
 
-
+# Global variables
 huntCountSaveFile = "Data/huntCount.txt"
 
 counting = False
 paused = False
 tempMinutes = 0
 tempSeconds = 0
+minsTotalSandwichReset = 0
+tempVar = 0
 tempSwitchOn = False
 listeningSwitch = False
 
+# -- for the listener -- #
 def onRelease(key):
     if key == Key.up:
         huntCountUp()
@@ -59,12 +69,11 @@ def listenerStop():
         listener.join()  # wait till thread really ends its job
         listener = None  # to inform that listener doesn't exist
 
+# -- end listener -- #
 
 ## -- system settings -- ##
 # Sets the appearance of the program to the system default (light or dark)
 ctkt.set_appearance_mode("dark")
-# Sets the default color theme of the program
-#ctkt.set_default_color_theme("dark-blue")
 
 
 
@@ -73,21 +82,23 @@ ctkt.set_appearance_mode("dark")
 root = ctkt.CTk()
 
 # specifiy geometry
-root.geometry("400x335")
+root.geometry("430x335")
 # sets app title
 root.title("Masuda Method Tool")
 
+# light/dark mode global variables
 darkSwitch = PhotoImage(file="Images/darkModeSwitch.png")
 lightSwitch = PhotoImage(file="Images/lightModeSwitch.png")
 switchValue = True
 lightDarkDifference = "transparent"
 
-# Theme
+# -- Theme -- #
 def themeToggle():
 
     global switchValue
     global lightDarkDifference
 
+    # toggles light/dark mode to light mode
     if switchValue == True:
         switch.configure(image=lightSwitch)
         style.theme_use("litera")
@@ -95,6 +106,7 @@ def themeToggle():
         lightDarkDifference = "white"
         switchValue = False
     
+    # toggles light/dark mode to dark mode
     else:
         switch.configure(image=darkSwitch)
         style.theme_use("darkly")
@@ -102,6 +114,7 @@ def themeToggle():
         lightDarkDifference = "transparent"
         switchValue = True
 
+    # Setting color differences between light and dark mode.
     timerFrame.configure(bg_color=lightDarkDifference)
     timerStartButton.configure(bg_color=lightDarkDifference)
     timerPauseButton.configure(bg_color=lightDarkDifference)
@@ -112,88 +125,80 @@ def themeToggle():
     titleFrame.configure(bg_color=lightDarkDifference)
     title.configure(bg_color=lightDarkDifference)
     switch.configure(bg_color=lightDarkDifference)
+    totalMinutes.configure(bg_color=lightDarkDifference)
 
 
-
+# -- Settings drop down option definitions -- #
 def fileDropdownOptions(x):
     global tempSwitchOn
     global listeningSwitch
+    # toggles on the program window stay on top of all other windows
     if x == "Always on Top" and tempSwitchOn == False:
         tempSwitchOn = True
         root.wm_attributes("-topmost", 1)
+    # toggles off the program window stay on top of all other windows
     elif x == "Always on Top" and tempSwitchOn == True:
         tempSwitchOn = False
         root.wm_attributes("-topmost", 0)
+    # toggles off the listener for button inputs
     elif x == "Toggle Listening" and listeningSwitch == True:
         listeningSwitch = False
         listenerStop()
+    # toggles on the listener for button inputs
     elif x == "Toggle Listening" and listeningSwitch == False:
         listeningSwitch = True
         listenerStart()
+    # the exit button calls exitAllProgram function
     else:
         exitAllProgram()
 
-# fileFrame = ctkt.CTkFrame(root,bg_color="transparent",fg_color="transparent")
-# fileFrame.pack(side="top",anchor="w")
-
-
-
-# fileDropdown = ctkt.CTkComboBox(fileFrame, values=["Always On Top", "Exit"], command=fileDropdownOptions)
-# fileDropdown.pack(side="left")
-
+# Frame for the title
 titleFrame = ctkt.CTkFrame(root,bg_color="transparent",fg_color="transparent")
 titleFrame.pack(side="top")
 
-# exitButton = ctkt.CTkButton(titleFrame,text="Exit",command=exitAllProgram, width=50,bg_color=lightDarkDifference,fg_color=lightDarkDifference,corner_radius=0,border_width=0,border_spacing=0)
-# exitButton.pack(padx=0,pady=0, side="left")
-
+# Settings for the drop 
 fileDropdownMenu = ttk.Menubutton(titleFrame,text="Settings")
 fileDropdownMenu.pack(side="left",anchor="w")
 
 # Creates menu
 fileDropdownInsideMenu = ttk.Menu(fileDropdownMenu)
 
-# Adds items to menu
+# Adds items in fileDropdownOptions to menu
 fileMenuItem = StringVar()
 for x in ["Always on Top", "Toggle Listening", "Exit"]:
     fileDropdownInsideMenu.add_radiobutton(label=x,command=lambda x=x: fileDropdownOptions(x))
 
 fileDropdownMenu["menu"] = fileDropdownInsideMenu
 
+# makes title label and puts it in the title frame in the middle
 title = ctkt.CTkLabel(titleFrame, text="AIO Masuda Method Tool")
-# Inserts element + padding ("pady" is distance from top of program )
+
+# Inserts element + padding
 title.pack(side="left", padx=80)
 
+# -- Default Style Settings -- #
 style = ttk.Style()
 style.theme_use('darkly')
-# style.configure('new.TNotebook', background = '#26242f', foreground = '#26242f', width = 20, borderwidth=0, focusthickness=0, focuscolor='#26242f')
-#style.configure('TNotebook', width = 20, borderwidth=0, focusthickness=0, focuscolor='#26242f')
-#style.map('TNotebook', foreground=[('active','#26242f')],background=[('active','#26242f')])
-# style.configure('new.TNotebook.Tab', background="#26242f", foreground="white", borderwidth=0, focusthickness=0, focuscolor='#26242f')
-#style.configure('TNotebook.Tab', borderwidth=0, focusthickness=0, focuscolor='#26242f')
 
-# style.map("new.TNotebook", foreground= [("selected", "#26242f")], background=[("selected", "#26242f")])
-#root.config(bg="#26242f")
-
+# light/dark mode switch button
 switch = ctkt.CTkButton(titleFrame, image=darkSwitch, bg_color="transparent",fg_color="transparent",text="",command=themeToggle,width=10,corner_radius=0)
 switch.pack(padx=0, side="right")
 
+# -- main tool tabs -- #
 mainTool = ttk.Notebook(root,width=525,height=350)
 mainTool.pack()
 
-#picnicFrame = ctkt.CTkFrame(mainTool, width=525, height=540,fg_color="#26242f",bg_color="black") #fg_color="#26242f"
-#huntFrame = ctkt.CTkFrame(mainTool, width=525, height=540,fg_color="#26242f",bg_color="black")
 picnicCanvas = ctkt.CTkCanvas(mainTool, bg="#26242f", highlightthickness=0, width=525, height=540)
 huntCanvas = ctkt.CTkCanvas(mainTool, bg="#26242f", highlightthickness=0, width=525, height=540)
 
 picnicCanvas.pack(fill="both",expand=1)
 huntCanvas.pack(fill="both",expand=1)
-#picnicFrame.pack(fill="both",expand=1) #fill="both" #expand=1
-#huntFrame.pack(fill="both",expand=1)
 
 mainTool.add(picnicCanvas, text="Picnic")
 mainTool.add(huntCanvas, text="Hunting")
+# -- tabs end -- #
 
+# main timer function ( might need to be reworked)
 def timerCountdown():
     mixer.music.stop()
     global paused
@@ -202,6 +207,16 @@ def timerCountdown():
     counting = True
     
     global minute, second
+
+    global minsTotalSandwichReset
+
+    global tempVar
+
+    if tempVar >= 30:
+        tempVar = 0
+        minsTotalSandwichReset.set(f"{tempVar}")
+        totalMinutes.update()
+
 
     if paused == False:
         minute, second = 5, 0
@@ -222,13 +237,14 @@ def timerCountdown():
                 timerFrame.update()
                 second -= 1
                 totalinseconds -= 1
-                time.sleep(1)
+                timerFrame.after(1000)
             else:
                 secondT.set(f" 0{second} ")
                 timerFrame.update()
                 second -= 1
                 totalinseconds -= 1
-                time.sleep(1)
+                timerFrame.after(1000)
+                
             
         elif minute > 0:
             if minute > 9:
@@ -243,7 +259,14 @@ def timerCountdown():
     if totalinseconds == -1:
         mixer.music.load("Sounds/timerEndSound.mp3")
         mixer.music.play()
+        tempVar += 5
+        minsTotalSandwichReset.set(f"{tempVar}")
+        totalMinutes.update()
+        if tempVar >= 30:
+            minsTotalSandwichReset.set(f"Egg Power Over")
+            totalMinutes.update()
 
+# timer pause (might need to be reworked if timer reworked)
 def timerPause():
     global counting
     global paused
@@ -253,13 +276,12 @@ def timerPause():
     if counting == True and paused == False:
         counting = False
         paused = True
+        timerFrame.update()
         if second > 9:
             secondT.set(f" {second} ")
-            timerFrame.update()
             tempSeconds = second
         else:
             secondT.set(f" 0{second} ")
-            timerFrame.update()
             tempSeconds = second
         if minute > 9:
             minuteT.set(f" {minute} ")
@@ -268,39 +290,51 @@ def timerPause():
             minuteT.set(f" 0{minute} ")
             tempMinutes = minute
 
-
-
-
-
+# default timer image display
 minuteT = tkt.StringVar(value=" 05 ")
 secondT = tkt.StringVar(value=" 00 ")
 
+# default egg power display
+minsTotalSandwichReset = tkt.StringVar(value="0")
+
+# fram for the timer's values / labels
 timerFrame = ctkt.CTkFrame(picnicCanvas, fg_color=lightDarkDifference,bg_color=lightDarkDifference)
 timerFrame.pack()
 
+# time labels
 minuteLabel = ctkt.CTkLabel(timerFrame, textvariable=minuteT,height=50,font=("Arial", 50))
 colonLabel = ctkt.CTkLabel(timerFrame, text=":",font=("Arial", 50))
 secondLabel = ctkt.CTkLabel(timerFrame, textvariable=secondT,height=50,font=("Arial", 50))
 
+# grid to align the labels
 minuteLabel.grid(column=0, row=0,)
 colonLabel.grid(column=1, row=0)
 secondLabel.grid(column=2, row=0)
 
+# Egg power label
+totalMinutes = ctkt.CTkLabel(picnicCanvas, textvariable=minsTotalSandwichReset,height=50,font=("Arial", 10))
+totalMinutes.pack()
+
+# timer start button
 timerStartButton = ctkt.CTkButton(picnicCanvas, text="Start", command=timerCountdown,bg_color=lightDarkDifference)
 timerStartButton.pack()
 
+# timer pause button
 timerPauseButton = ctkt.CTkButton(picnicCanvas, text="Pause", command=timerPause,bg_color=lightDarkDifference)
 timerPauseButton.pack()
 
+# creates file to save hunt count to file
 def saveHuntCount(huntCount, filename):
     with open(filename, "w") as f:
         f.write(str(huntCount))
 
+# loads hunt count value from file
 def loadHuntCount(filename):
     with open(filename, "r") as f:
         read = f.read()
     return read
 
+# adds 1 to hunt counter
 def huntCountUp():
 
     count = int(huntCounter.get())
@@ -309,6 +343,7 @@ def huntCountUp():
     saveHuntCount(str(count),huntCountSaveFile)
     huntCounterLabel.update()
 
+# subtracts 1 from hunt counter
 def huntCountDown():
 
     count = int(huntCounter.get())
@@ -317,37 +352,37 @@ def huntCountDown():
     saveHuntCount(str(count),huntCountSaveFile)
     huntCounterLabel.update()
 
+# sets hunt counter to 0
 def huntCountClear():
     huntCounter.set("0")
     saveHuntCount(0,huntCountSaveFile)
     huntCounterLabel.update()
     
 
-
+# hunt count frame
 huntCounterFrame = ctkt.CTkFrame(huntCanvas, fg_color="transparent")
 huntCounterFrame.pack()
 
+# default hunt count (first time opening program)
 huntCounter = tkt.StringVar(value="0")
 
+# hunt count label for displaying hunt count
 huntCounterLabel = ctkt.CTkLabel(huntCounterFrame, textvariable=huntCounter,font=("Arial", 50))
 huntCounterLabel.pack()
 
+# button for hunt count up
 huntCounterUpButton = ctkt.CTkButton(huntCanvas, text="+1", command=huntCountUp)
 huntCounterUpButton.pack()
 
+# button for hunt count down
 huntCounterDownButton = ctkt.CTkButton(huntCanvas, text="-1", command=huntCountDown)
 huntCounterDownButton.pack()
 
+# button for setting hunt count to 0
 huntCounterClearButton = ctkt.CTkButton(huntCanvas, text="Clear", command=huntCountClear)
 huntCounterClearButton.pack()
 
-
-# timerLabel = ctkt.CTkLabel(picnicFrame, text=)
-# # Inserts element + padding ("pady" is distance from top of program )
-# timerLabel.pack(padx=1, pady=1)
-
-
-
+# main loop for the program (runs it)
 if __name__ == "__main__":
     
     try:

@@ -298,7 +298,7 @@ secondT = tkt.StringVar(value=" 00 ")
 # default egg power display
 minsTotalSandwichReset = tkt.StringVar(value="0")
 
-# fram for the timer's values / labels
+# frame for the timer's values / labels
 timerFrame = ctkt.CTkFrame(picnicCanvas, fg_color=lightDarkDifference,bg_color=lightDarkDifference)
 timerFrame.pack()
 
